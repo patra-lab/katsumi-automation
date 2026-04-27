@@ -138,9 +138,9 @@ def generate_agreement_form(
     holidays: dict,
     stats: Dict,
     output_path: Path,
-    company_name: str = "☐☐☐☐株式会社",
-    representative: str = "代表取締役 ☐☐ ☐☐",
-    worker_rep: str = "労働者代表 ☐☐ ☐☐",
+    company_name: str = "有限会社勝己鉄工所",
+    representative: str = "代表取締役　浜場　大介",
+    worker_rep: str = "労働者代表　製造部門　影山雅幸",
     worker_count: int = 10,
     prev_period: str = "",
 ) -> Path:
@@ -240,9 +240,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="協定届（様式第4号）PDF を生成する")
     parser.add_argument("json_file", type=Path, help="休日 JSON ファイルパス")
     parser.add_argument("--out", type=Path, default=Path("agreement_form.pdf"), help="出力 PDF パス")
-    parser.add_argument("--company", default="☐☐☐☐株式会社", help="会社名")
-    parser.add_argument("--representative", default="代表取締役 ☐☐ ☐☐", help="代表者名")
-    parser.add_argument("--worker-rep", default="労働者代表 ☐☐ ☐☐", help="労働者代表名")
+    parser.add_argument("--company", default="有限会社勝己鉄工所", help="会社名")
+    parser.add_argument("--representative", default="代表取締役　浜場　大介", help="代表者名")
+    parser.add_argument("--worker-rep", default="労働者代表　製造部門　影山雅幸", help="労働者代表名")
     parser.add_argument("--worker-count", type=int, default=10, help="労働者数")
     parser.add_argument("--prev-period", default="", help="旧協定期間 (例: 2025-10-01 〜 2025-12-31)")
     args = parser.parse_args()
