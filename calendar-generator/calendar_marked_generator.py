@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-calendar_marked_generator.py（修正版）
+calendar_marked_generator.py（A形式・完全版）
 
 holiday_extractor.py の JSON 出力を読み込み、
-対象期間（3ヶ月分）のカレンダーを生成し、
-休日（法定・法定外休日）を赤背景で塗りつぶした PDF を出力する。
+3ヶ月分の月間カレンダーを A4 横向き 1ページに横並びで描画し、
+休日（法定・法定外）を赤背景で塗りつぶした PDF を出力する。
 
-A4 横向き（landscape）で、数字が確実に表示されるように座標を調整済み。
+申請書添付用の正式ヘッダー付き。
 """
 
 import json
@@ -29,9 +29,7 @@ CREATED_DATE_TEXT = "2026年4月27日"
 def load_holidays(json_path):
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    stat = set(data["statutory_holidays"])
-    non_stat = set(data["non_statutory_holidays"])
-    return stat, non_stat
+    return set(data["statutory_holidays"]), set(data["non_statutory_holidays"])
 
 
 def detect_period(stat_set, non_stat_set):
@@ -42,24 +40,24 @@ def detect_period(stat_set, non_stat_set):
 
 def draw_header(c):
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(20*mm, 190*mm, "休日及び労働時間に関する協定（変形労働時間制）")
+    c.drawString(15*mm, 190*mm, "休日及び労働時間に関する協定（変形労働時間制）")
 
     c.setFont("Helvetica", 11)
     y = 180*mm
     gap = 7*mm
 
-    c.drawString(20*mm, y, f"事業場名：{COMPANY_NAME}")
+    c.drawString(15*mm, y, f"事業場名：{COMPANY_NAME}")
     y -= gap
-    c.drawString(20*mm, y, f"所在地：{COMPANY_ADDRESS}")
+    c.drawString(15*mm, y, f"所在地：{COMPANY_ADDRESS}")
     y -= gap
-    c.drawString(20*mm, y, f"対象期間：{PERIOD_TEXT}")
+    c.drawString(15*mm, y, f"対象期間：{PERIOD_TEXT}")
     y -= gap
-    c.drawString(20*mm, y, f"労働者数：{WORKER_COUNT_TEXT}")
+    c.drawString(15*mm, y, f"労働者数：{WORKER_COUNT_TEXT}")
     y -= gap
-    c.drawString(20*mm, y, f"作成日：{CREATED_DATE_TEXT}")
+    c.drawString(15*mm, y, f"作成日：{CREATED_DATE_TEXT}")
     y -= gap
 
-    c.drawString(20*mm, y, "凡例：赤背景＝休日（法定休日・法定外休日を含む）")
+    c.drawString(15*mm, y, "凡例：赤背景＝休日（法定休日・法定外休日を含む）")
 
 
 def draw_month(c, year, month, x_offset, y_offset, stat_set, non_stat_set):
@@ -68,13 +66,13 @@ def draw_month(c, year, month, x_offset, y_offset, stat_set, non_stat_set):
 
     # タイトル
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(x_offset, y_offset + 45*mm, f"{year}年 {month}月")
+    c.drawString(x_offset, y_offset + 55*mm, f"{year}年 {month}月")
 
     # 曜日
     c.setFont("Helvetica", 9)
     weekdays = ["日","月","火","水","木","金","土"]
     for i, wd in enumerate(weekdays):
-        c.drawString(x_offset + i*18*mm, y_offset + 40*mm, wd)
+        c.drawString(x_offset + i*18*mm, y_offset + 50*mm, wd)
 
     # マス
     cell_w = 18*mm
@@ -86,7 +84,7 @@ def draw_month(c, year, month, x_offset, y_offset, stat_set, non_stat_set):
                 continue
 
             x = x_offset + col_idx * cell_w
-            y = y_offset + (35*mm - row_idx * cell_h)
+            y = y_offset + (45*mm - row_idx * cell_h)
 
             d_str = f"{year}-{month:02d}-{day:02d}"
 
@@ -98,6 +96,7 @@ def draw_month(c, year, month, x_offset, y_offset, stat_set, non_stat_set):
             else:
                 c.setFillColor(colors.black)
 
+            # 数字
             c.drawString(x + 2*mm, y - cell_h + 4, str(day))
             c.setFillColor(colors.black)
 
@@ -110,7 +109,7 @@ def create_calendar_pdf(json_path, output_path):
 
     draw_header(c)
 
-    # 横向きなので広く使える
+    # カレンダー配置（横3つ）
     base_x = 20*mm
     base_y = 110*mm
     gap_x = 70*mm
