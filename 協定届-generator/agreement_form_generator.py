@@ -141,7 +141,8 @@ def generate_agreement_form(
     company_name: str = "有限会社勝己鉄工所",
     representative: str = "代表取締役　浜場　大介",
     worker_rep: str = "労働者代表　製造部門　影山雅幸",
-    worker_count: int = 10,
+    worker_count: int = 4,
+    address: str = "岡山市中区江並204-5",
     prev_period: str = "",
 ) -> Path:
     """協定届（様式第4号）PDF を生成する。"""
@@ -179,7 +180,7 @@ def generate_agreement_form(
     # --- 事業場情報 ---
     y = draw_row(y, "事業の種類", "製造業")
     y = draw_row(y, "事業の名称", company_name)
-    y = draw_row(y, "事業の所在地", "（事業場住所）")
+    y = draw_row(y, "事業の所在地", address)
     y = draw_row(y, "労働者数", f"{worker_count}人")
     y -= 5 * mm
 
@@ -243,35 +244,6 @@ def main() -> None:
     parser.add_argument("--company", default="有限会社勝己鉄工所", help="会社名")
     parser.add_argument("--representative", default="代表取締役　浜場　大介", help="代表者名")
     parser.add_argument("--worker-rep", default="労働者代表　製造部門　影山雅幸", help="労働者代表名")
-    parser.add_argument("--worker-count", type=int, default=10, help="労働者数")
-    parser.add_argument("--prev-period", default="", help="旧協定期間 (例: 2025-10-01 〜 2025-12-31)")
-    args = parser.parse_args()
-
-    if not args.json_file.exists():
-        print(f"[ERROR] JSON ファイルが見つかりません: {args.json_file}", file=sys.stderr)
-        sys.exit(1)
-
-    holidays = json.loads(args.json_file.read_text(encoding="utf-8"))
-    start, end = detect_period(holidays)
-    stats = compute_stats(holidays, start, end)
-
-    print(f"[期間判定] {stats['period_start']} 〜 {stats['period_end']}")
-    print(f"[統計] 労働日={stats['working_days']}, 休日={stats['total_holidays']}, "
-          f"最長連続労働={stats['max_consecutive_working_days']}, "
-          f"48h超週={stats['weeks_over_48h']}")
-
-    out = generate_agreement_form(
-        holidays=holidays,
-        stats=stats,
-        output_path=args.out,
-        company_name=args.company,
-        representative=args.representative,
-        worker_rep=args.worker_rep,
-        worker_count=args.worker_count,
-        prev_period=args.prev_period,
-    )
-    print(f"[完了] 協定届 PDF を保存しました: {out}")
-
-
-if __name__ == "__main__":
-    main()
+    parser.add_argument("--worker-count", type=int, default=4, help="労働者数")
+    parser.add_argument("--address", default="岡山市中区江並204-5", help="事業場所在地")
+    parser.add_arg
