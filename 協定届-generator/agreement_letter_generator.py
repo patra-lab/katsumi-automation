@@ -137,9 +137,11 @@ def generate_agreement_letter(
     holidays: dict,
     stats: Dict,
     output_path: Path,
-        company_name: str = "有限会社勝己鉄工所",
-        representative: str = "代表取締役　浜場　大介",
-        worker_rep: str = "労働者代表　製造部門　影山雅幸",
+    company_name: str = "有限会社勝己鉄工所",
+    representative: str = "代表取締役　浜場　大介",
+    worker_rep: str = "労働者代表　製造部門　影山雅幸",
+    worker_count: int = 4,
+    address: str = "岡山市中区江並204-5",
 ) -> Path:
     """協定書（誓約書）PDF を生成する。"""
     font_name = register_jp_font()
@@ -164,6 +166,8 @@ def generate_agreement_letter(
     y = draw_text(f"対象期間：{period_str}", 20 * mm, y)
     y -= 5
     y = draw_text(f"事業場名：{company_name}", 20 * mm, y)
+    y = draw_text(f"所在地　：{address}", 20 * mm, y)
+    y = draw_text(f"労働者数：{worker_count}人", 20 * mm, y)
     y -= 10
 
     y = draw_text("第1条（労働時間）", 20 * mm, y, 11)
@@ -230,33 +234,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="協定書（誓約書）PDF を生成する")
     parser.add_argument("json_file", type=Path, help="休日 JSON ファイルパス")
     parser.add_argument("--out", type=Path, default=Path("agreement_letter.pdf"), help="出力 PDF パス")
-        parser.add_argument("--company", default="有限会社勝己鉄工所", help="会社名")
-        parser.add_argument("--representative", default="代表取締役　浜場　大介", help="代表者名")
-        parser.add_argument("--worker-rep", default="労働者代表　製造部門　影山雅幸", help="労働者代表名")
+    parser.add_argument("--company", default="有限会社勝己鉄工所", help="会社名")
+    parser.add_argument("--representative", default="代表取締役　浜場　大介", help="代表者名")
+    parser.add_argument("--worker-rep", default="労働者代表　製造部門　影山雅幸", help="労働者代表名")
+    parser.add_argument("--worker-count", type=int, default=4, help="労働者数")
+    parser.add_argument("--address", default="岡山市中区江並204-5", help="事業場所在地")
     args = parser.parse_args()
 
     if not args.json_file.exists():
         print(f"[ERROR] JSON ファイルが見つかりません: {args.json_file}", file=sys.stderr)
         sys.exit(1)
 
-    holidays = json.loads(args.json_file.read_text(encoding="utf-8"))
-    start, end = detect_period(holidays)
-    stats = compute_stats(holidays, start, end)
-
-    print(f"[期間判定] {stats['period_start']} 〜 {stats['period_end']}")
-    print(f"[労働日数] {stats['working_days']}日 / 休日{stats['total_holidays']}日")
-    print(f"[最長連続労働] {stats['max_consecutive_working_days']}日")
-
-    out = generate_agreement_letter(
-        holidays=holidays,
-        stats=stats,
-        output_path=args.out,
-        company_name=args.company,
-        representative=args.representative,
-        worker_rep=args.worker_rep,
-    )
-    print(f"[完了] 協定書 PDF を保存しました: {out}")
-
-
-if __name__ == "__main__":
-    main()
+    holidays = json.loads(args.json_
